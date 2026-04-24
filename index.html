@@ -1,0 +1,2052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instant Portfolio Generator</title>
+    <style>
+        :root {
+            --bg: #1a1d23;
+            --surface: #21252b;
+            --surface2: #282c34;
+            --text: #e1e4e8;
+            --text2: #a0a6b0;
+            --accent: #5b9bd5;
+            --accent2: #4a8ac4;
+            --border: #333842;
+            --danger: #e0556a;
+            --success: #7ec87b;
+            --radius: 10px;
+            --radius-sm: 6px;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+            --transition: 0.2s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .app-header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            z-index: 10;
+            box-shadow: 0 1px 8px rgba(0, 0, 0, 0.2);
+        }
+        .app-header .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 1.15rem;
+            letter-spacing: -0.3px;
+        }
+        .app-header .logo .icon {
+            width: 34px;
+            height: 34px;
+            background: var(--accent);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .btn {
+            padding: 9px 18px;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: -0.2px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background: var(--accent2);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(91, 155, 213, 0.35);
+        }
+        .btn-outline {
+            background: transparent;
+            color: var(--text);
+            border: 1.5px solid var(--border);
+        }
+        .btn-outline:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .btn-sm {
+            padding: 5px 12px;
+            font-size: 0.8rem;
+            border-radius: 4px;
+        }
+        .btn-danger-sm {
+            background: transparent;
+            color: var(--danger);
+            border: 1px solid transparent;
+            cursor: pointer;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+        .btn-danger-sm:hover {
+            background: rgba(224, 85, 106, 0.12);
+            border-color: var(--danger);
+        }
+        .btn-add {
+            background: transparent;
+            color: var(--accent);
+            border: 1.5px dashed var(--border);
+            cursor: pointer;
+            font-size: 0.8rem;
+            padding: 7px 14px;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+            width: 100%;
+            text-align: center;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+        .btn-add:hover {
+            border-color: var(--accent);
+            background: rgba(91, 155, 213, 0.06);
+        }
+
+        /* Main Layout */
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            height: calc(100vh - 58px);
+        }
+
+        /* Form Panel */
+        .form-panel {
+            width: 46%;
+            min-width: 420px;
+            max-width: 580px;
+            overflow-y: auto;
+            padding: 20px 22px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            scroll-behavior: smooth;
+        }
+        .form-panel::-webkit-scrollbar {
+            width: 5px;
+        }
+        .form-panel::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 10px;
+        }
+
+        .form-section {
+            background: var(--surface2);
+            border-radius: var(--radius);
+            padding: 16px 18px;
+            border: 1px solid transparent;
+            transition: var(--transition);
+        }
+        .form-section:hover {
+            border-color: var(--border);
+        }
+        .form-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            gap: 10px;
+        }
+        .form-section-header h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: -0.2px;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .form-section-header h3 .sec-icon {
+            font-size: 1rem;
+            opacity: 0.7;
+        }
+        .toggle-switch {
+            position: relative;
+            width: 38px;
+            height: 22px;
+            flex-shrink: 0;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background: #555;
+            border-radius: 22px;
+            transition: var(--transition);
+        }
+        .toggle-slider::before {
+            content: '';
+            position: absolute;
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background: #fff;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+        .toggle-switch input:checked+.toggle-slider {
+            background: var(--accent);
+        }
+        .toggle-switch input:checked+.toggle-slider::before {
+            transform: translateX(16px);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+            min-width: 100px;
+        }
+        .form-group label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text2);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            padding: 8px 11px;
+            border-radius: var(--radius-sm);
+            border: 1.5px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            font-size: 0.85rem;
+            font-family: inherit;
+            transition: var(--transition);
+            resize: vertical;
+            width: 100%;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(91, 155, 213, 0.1);
+        }
+        .form-group textarea {
+            min-height: 60px;
+            resize: vertical;
+        }
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: #555;
+        }
+
+        .dynamic-entry {
+            background: var(--bg);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            margin-bottom: 8px;
+            position: relative;
+            border: 1px solid transparent;
+            transition: var(--transition);
+        }
+        .dynamic-entry:hover {
+            border-color: var(--border);
+        }
+        .dynamic-entry .entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .dynamic-entry .entry-number {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Preview Panel */
+        .preview-panel {
+            flex: 1;
+            background: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .preview-toolbar {
+            background: #fff;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #e0e0e0;
+            flex-shrink: 0;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .preview-toolbar span {
+            font-size: 0.8rem;
+            color: #666;
+            font-weight: 600;
+            letter-spacing: -0.2px;
+        }
+        .preview-toolbar .device-btns {
+            display: flex;
+            gap: 4px;
+        }
+        .device-btn {
+            padding: 5px 10px;
+            border: 1.5px solid #ddd;
+            background: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: var(--transition);
+            color: #555;
+        }
+        .device-btn.active {
+            background: #e8f0fa;
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .preview-iframe-wrap {
+            flex: 1;
+            overflow: auto;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            background: #e8ecf1;
+        }
+        .preview-iframe-wrap iframe {
+            border: none;
+            background: #fff;
+            box-shadow: var(--shadow);
+            border-radius: 6px;
+            transition: width 0.35s ease, height 0.35s ease;
+            width: 100%;
+            max-width: 900px;
+            min-height: 600px;
+            height: fit-content;
+        }
+        .preview-iframe-wrap.phone-view iframe {
+            max-width: 390px;
+        }
+        .preview-iframe-wrap.tablet-view iframe {
+            max-width: 700px;
+        }
+
+        /* Color Picker */
+        .color-swatches {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .color-swatch {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2.5px solid transparent;
+            transition: var(--transition);
+            flex-shrink: 0;
+        }
+        .color-swatch:hover {
+            transform: scale(1.15);
+        }
+        .color-swatch.active {
+            border-color: #fff;
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.25);
+        }
+        .color-swatch.c-blue {
+            background: #4a90d9;
+        }
+        .color-swatch.c-green {
+            background: #3cb878;
+        }
+        .color-swatch.c-purple {
+            background: #7c5ce7;
+        }
+        .color-swatch.c-orange {
+            background: #e8813b;
+        }
+        .color-swatch.c-teal {
+            background: #2eafac;
+        }
+        .color-swatch.c-rose {
+            background: #e0557a;
+        }
+
+        /* Theme select */
+        .theme-select {
+            display: flex;
+            gap: 8px;
+        }
+        .theme-option {
+            padding: 7px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1.5px solid var(--border);
+            background: transparent;
+            color: var(--text2);
+            transition: var(--transition);
+        }
+        .theme-option.active {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--success);
+            color: #000;
+            padding: 12px 20px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 0.85rem;
+            z-index: 999;
+            box-shadow: var(--shadow);
+            animation: slideIn 0.3s ease, fadeOut 0.3s ease 2s forwards;
+            pointer-events: none;
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateY(40px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Mobile tabs */
+        .mobile-tabs {
+            display: none;
+            gap: 0;
+            flex-shrink: 0;
+            border-bottom: 2px solid var(--border);
+        }
+        .mobile-tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--text2);
+            background: var(--surface);
+            border: none;
+            transition: var(--transition);
+        }
+        .mobile-tab.active {
+            color: var(--accent);
+            border-bottom: 3px solid var(--accent);
+            margin-bottom: -2px;
+            background: var(--surface2);
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .main-container {
+                flex-direction: column;
+            }
+            .form-panel {
+                width: 100%;
+                max-width: 100%;
+                min-width: unset;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                max-height: 55vh;
+            }
+            .preview-panel {
+                flex: 1;
+                min-height: 40vh;
+            }
+            .preview-iframe-wrap {
+                padding: 10px;
+            }
+            .preview-iframe-wrap iframe {
+                max-width: 100%;
+                min-height: 400px;
+            }
+            .mobile-tabs {
+                display: flex;
+            }
+            .form-panel.hidden-on-mobile {
+                display: none;
+            }
+            .preview-panel.hidden-on-mobile {
+                display: none;
+            }
+            .app-header {
+                padding: 10px 14px;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .app-header .logo {
+                font-size: 1rem;
+            }
+            .btn {
+                padding: 7px 12px;
+                font-size: 0.8rem;
+            }
+        }
+        @media (max-width: 500px) {
+            .form-panel {
+                padding: 12px 10px;
+                max-height: 50vh;
+            }
+            .form-section {
+                padding: 12px 10px;
+            }
+            .form-row {
+                flex-direction: column;
+                gap: 6px;
+            }
+            .preview-iframe-wrap {
+                padding: 4px;
+            }
+            .preview-iframe-wrap iframe {
+                border-radius: 0;
+                min-height: 300px;
+            }
+            .header-actions {
+                gap: 4px;
+            }
+            .btn {
+                padding: 6px 10px;
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- App Header -->
+    <header class="app-header">
+        <div class="logo">
+            <div class="icon">⚡</div>
+            <span>Instant Portfolio Generator</span>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-outline btn-sm" onclick="loadSampleData()" title="Load sample data">📋 Sample Data</button>
+            <button class="btn btn-outline btn-sm" onclick="clearAllFields()">🗑 Clear</button>
+            <button class="btn btn-primary" onclick="generateAndPreview()">🔄 Generate Preview</button>
+            <button class="btn btn-primary" onclick="downloadPortfolio()" style="background:#7ec87b;">⬇ Download</button>
+        </div>
+    </header>
+
+    <!-- Mobile Tabs -->
+    <div class="mobile-tabs" id="mobileTabs">
+        <button class="mobile-tab active" onclick="switchMobileTab('form')">📝 Form</button>
+        <button class="mobile-tab" onclick="switchMobileTab('preview')">👁 Preview</button>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Form Panel -->
+        <div class="form-panel" id="formPanel">
+            <!-- Personal Info -->
+            <div class="form-section">
+                <div class="form-section-header">
+                    <h3><span class="sec-icon">👤</span> Personal Info</h3>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Full Name *</label><input type="text" id="name" placeholder="Jane Doe"></div>
+                    <div class="form-group"><label>Professional Title *</label><input type="text" id="title" placeholder="Full-Stack Developer"></div>
+                </div>
+                <div class="form-row" style="margin-top:8px;">
+                    <div class="form-group"><label>Tagline</label><input type="text" id="tagline" placeholder="Building elegant solutions to complex problems"></div>
+                    <div class="form-group"><label>Profile Photo URL</label><input type="url" id="photoUrl" placeholder="https://example.com/photo.jpg"></div>
+                </div>
+                <div class="form-group" style="margin-top:8px;"><label>About Me</label><textarea id="about" placeholder="A passionate developer with 5+ years of experience..."></textarea></div>
+            </div>
+
+            <!-- Skills -->
+            <div class="form-section">
+                <div class="form-section-header">
+                    <h3><span class="sec-icon">🛠</span> Skills</h3>
+                    <label class="toggle-switch" title="Include this section"><input type="checkbox" id="includeSkills" checked><span class="toggle-slider"></span></label>
+                </div>
+                <div id="skillsContainer">
+                    <div class="dynamic-entry skill-entry">
+                        <div class="entry-header"><span class="entry-number">Skill #1</span><button class="btn-danger-sm" onclick="removeEntry(this)" title="Remove">✕</button></div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Skill Name</label><input type="text" class="skill-name" placeholder="JavaScript"></div>
+                            <div class="form-group" style="max-width:130px;"><label>Proficiency</label><select class="skill-level"><option value="25">Beginner</option><option value="50" selected>Intermediate</option><option value="75">Advanced</option><option value="100">Expert</option></select></div>
+                        </div>
+                    </div>
+                    <div class="dynamic-entry skill-entry">
+                        <div class="entry-header"><span class="entry-number">Skill #2</span><button class="btn-danger-sm" onclick="removeEntry(this)" title="Remove">✕</button></div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Skill Name</label><input type="text" class="skill-name" placeholder="React"></div>
+                            <div class="form-group" style="max-width:130px;"><label>Proficiency</label><select class="skill-level"><option value="25">Beginner</option><option value="50">Intermediate</option><option value="75" selected>Advanced</option><option value="100">Expert</option></select></div>
+                        </div>
+                    </div>
+                    <div class="dynamic-entry skill-entry">
+                        <div class="entry-header"><span class="entry-number">Skill #3</span><button class="btn-danger-sm" onclick="removeEntry(this)" title="Remove">✕</button></div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Skill Name</label><input type="text" class="skill-name" placeholder="Node.js"></div>
+                            <div class="form-group" style="max-width:130px;"><label>Proficiency</label><select class="skill-level"><option value="25">Beginner</option><option value="50" selected>Intermediate</option><option value="75">Advanced</option><option value="100">Expert</option></select></div>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn-add" onclick="addSkill()">+ Add Skill</button>
+            </div>
+
+            <!-- Projects -->
+            <div class="form-section">
+                <div class="form-section-header">
+                    <h3><span class="sec-icon">📁</span> Projects</h3>
+                    <label class="toggle-switch" title="Include this section"><input type="checkbox" id="includeProjects" checked><span class="toggle-slider"></span></label>
+                </div>
+                <div id="projectsContainer">
+                    <div class="dynamic-entry project-entry">
+                        <div class="entry-header"><span class="entry-number">Project #1</span><button class="btn-danger-sm" onclick="removeEntry(this)" title="Remove">✕</button></div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Project Title</label><input type="text" class="proj-title" placeholder="E-Commerce Platform"></div>
+                            <div class="form-group"><label>Live URL</label><input type="url" class="proj-link" placeholder="https://..."></div>
+                        </div>
+                        <div class="form-group" style="margin-top:6px;"><label>Technologies (comma-separated)</label><input type="text" class="proj-tech" placeholder="React, Node.js, MongoDB"></div>
+                        <div class="form-group" style="margin-top:6px;"><label>Description</label><textarea class="proj-desc" placeholder="A full-stack e-commerce solution with real-time inventory management..."></textarea></div>
+                    </div>
+                    <div class="dynamic-entry project-entry">
+                        <div class="entry-header"><span class="entry-number">Project #2</span><button class="btn-danger-sm" onclick="removeEntry(this)" title="Remove">✕</button></div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Project Title</label><input type="text" class="proj-title" placeholder="Task Manager App"></div>
+                            <div class="form-group"><label>Live URL</label><input type="url" class="proj-link" placeholder="https://..."></div>
+                        </div>
+                        <div class="form-group" style="margin-top:6px;"><label>Technologies</label><input type="text" class="proj-tech" placeholder="Vue.js, Firebase"></div>
+                        <div class="form-group" style="margin-top:6px;"><label>Description</label><textarea class="proj-desc" placeholder="A collaborative task management tool with drag-and-drop..."></textarea></div>
+                    </div>
+                </div>
+                <button class="btn-add" onclick="addProject()">+ Add Project</button>
+            </div>
+
+            <!-- Experience -->
+            <div class="form-section">
+                <div class="form-section-header">
+                    <h3><span class="sec-icon">💼</span> Experience</h3>
+                    <label class="toggle-switch" title="Include this section"><input type="checkbox" id="includeExperience" checked><span class="toggle-slider"></span></label>
+                </div>
+                <div id="experienceContainer">
+                    <div class="dynamic-entry exp-entry">
+                        <div class="entry-header"><span class="entry-number">Position #1</span><button class="btn-danger-sm" onclick="removeEntry(this)" title="Remove">✕</button></div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Company</label><input type="text" class="exp-company" placeholder="Acme Corp"></div>
+                            <div class="form-group"><label>Role</label><input type="text" class="exp-role" placeholder="Senior Developer"></div>
+                        </div>
+                        <div class="form-row" style="margin-top:6px;">
+                            <div class="form-group"><label>Start</label><input type="text" class="exp-start" placeholder="2021"></div>
+                            <div class="form-group"><label>End</label><input type="text" class="exp-end" placeholder="Present"></div>
+                        </div>
+                        <div class="form-group" style="margin-top:6px;"><label>Description</label><textarea class="exp-desc" placeholder="Led a team of 5 developers..."></textarea></div>
+                    </div>
+                </div>
+                <button class="btn-add" onclick="addExperience()">+ Add Experience</button>
+            </div>
+
+            <!-- Education -->
+            <div class="form-section">
+                <div class="form-section-header">
+                    <h3><span class="sec-icon">🎓</span> Education</h3>
+                    <label class="toggle-switch" title="Include this section"><input type="checkbox" id="includeEducation" checked><span class="toggle-slider"></span></label>
+                </div>
+                <div id="educationContainer">
+                    <div class="dynamic-entry edu-entry">
+                        <div class="entry-header"><span class="entry-number">Education #1</span><button class="btn-danger-sm" onclick="removeEntry(this)" title="Remove">✕</button></div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Institution</label><input type="text" class="edu-inst" placeholder="University of Technology"></div>
+                            <div class="form-group"><label>Degree</label><input type="text" class="edu-degree" placeholder="B.Sc. Computer Science"></div>
+                        </div>
+                        <div class="form-group" style="margin-top:6px;max-width:140px;"><label>Year</label><input type="text" class="edu-year" placeholder="2020"></div>
+                    </div>
+                </div>
+                <button class="btn-add" onclick="addEducation()">+ Add Education</button>
+            </div>
+
+            <!-- Certifications -->
+            <div class="form-section">
+                <div class="form-section-header">
+                    <h3><span class="sec-icon">📜</span> Certifications</h3>
+                    <label class="toggle-switch" title="Include this section"><input type="checkbox" id="includeCertifications" checked><span class="toggle-slider"></span></label>
+                </div>
+                <div id="certificationsContainer">
+                    <div class="dynamic-entry cert-entry">
+                        <div class="entry-header"><span class="entry-number">Cert #1</span><button class="btn-danger-sm" onclick="removeEntry(this)" title="Remove">✕</button></div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Name</label><input type="text" class="cert-name" placeholder="AWS Solutions Architect"></div>
+                            <div class="form-group"><label>Issuer</label><input type="text" class="cert-issuer" placeholder="Amazon"></div>
+                        </div>
+                        <div class="form-group" style="margin-top:6px;max-width:140px;"><label>Year</label><input type="text" class="cert-year" placeholder="2023"></div>
+                    </div>
+                </div>
+                <button class="btn-add" onclick="addCertification()">+ Add Certification</button>
+            </div>
+
+            <!-- Hobbies -->
+            <div class="form-section">
+                <div class="form-section-header">
+                    <h3><span class="sec-icon">🎯</span> Hobbies & Interests</h3>
+                    <label class="toggle-switch" title="Include this section"><input type="checkbox" id="includeHobbies" checked><span class="toggle-slider"></span></label>
+                </div>
+                <div class="form-group"><label>Enter hobbies (comma-separated)</label><input type="text" id="hobbies" placeholder="Photography, Hiking, Open Source, Chess"></div>
+            </div>
+
+            <!-- Contact & Social -->
+            <div class="form-section">
+                <div class="form-section-header">
+                    <h3><span class="sec-icon">📬</span> Contact & Social</h3>
+                    <label class="toggle-switch" title="Include this section"><input type="checkbox" id="includeContact" checked><span class="toggle-slider"></span></label>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Email</label><input type="email" id="email" placeholder="jane@example.com"></div>
+                    <div class="form-group"><label>Phone</label><input type="text" id="phone" placeholder="+1 (555) 123-4567"></div>
+                    <div class="form-group"><label>Location</label><input type="text" id="location" placeholder="San Francisco, CA"></div>
+                </div>
+                <div class="form-row" style="margin-top:8px;">
+                    <div class="form-group"><label>GitHub URL</label><input type="url" id="github" placeholder="https://github.com/..."></div>
+                    <div class="form-group"><label>LinkedIn URL</label><input type="url" id="linkedin" placeholder="https://linkedin.com/in/..."></div>
+                </div>
+                <div class="form-row" style="margin-top:8px;">
+                    <div class="form-group"><label>Twitter URL</label><input type="url" id="twitter" placeholder="https://twitter.com/..."></div>
+                    <div class="form-group"><label>Website</label><input type="url" id="website" placeholder="https://..."></div>
+                </div>
+            </div>
+
+            <!-- Customization -->
+            <div class="form-section">
+                <div class="form-section-header">
+                    <h3><span class="sec-icon">🎨</span> Customization</h3>
+                </div>
+                <div class="form-row" style="align-items:center;">
+                    <label style="font-size:0.8rem;font-weight:600;color:var(--text2);">Accent Color:</label>
+                    <div class="color-swatches" id="colorSwatches">
+                        <span class="color-swatch c-blue active" data-color="#4a90d9" onclick="selectColor(this)"></span>
+                        <span class="color-swatch c-green" data-color="#3cb878" onclick="selectColor(this)"></span>
+                        <span class="color-swatch c-purple" data-color="#7c5ce7" onclick="selectColor(this)"></span>
+                        <span class="color-swatch c-orange" data-color="#e8813b" onclick="selectColor(this)"></span>
+                        <span class="color-swatch c-teal" data-color="#2eafac" onclick="selectColor(this)"></span>
+                        <span class="color-swatch c-rose" data-color="#e0557a" onclick="selectColor(this)"></span>
+                    </div>
+                </div>
+                <div class="form-row" style="margin-top:10px;align-items:center;">
+                    <label style="font-size:0.8rem;font-weight:600;color:var(--text2);">Default Theme:</label>
+                    <div class="theme-select">
+                        <span class="theme-option active" data-theme="light" onclick="selectTheme(this)">☀ Light</span>
+                        <span class="theme-option" data-theme="dark" onclick="selectTheme(this)">🌙 Dark</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview Panel -->
+        <div class="preview-panel" id="previewPanel">
+            <div class="preview-toolbar">
+                <span>👁 Live Preview</span>
+                <div class="device-btns">
+                    <button class="device-btn active" data-width="full" onclick="setPreviewWidth(this,'full')">Desktop</button>
+                    <button class="device-btn" data-width="tablet" onclick="setPreviewWidth(this,'tablet')">Tablet</button>
+                    <button class="device-btn" data-width="phone" onclick="setPreviewWidth(this,'phone')">Phone</button>
+                </div>
+            </div>
+            <div class="preview-iframe-wrap" id="previewWrap">
+                <iframe id="previewIframe" title="Portfolio Preview" srcdoc="<html><body style='display:flex;align-items:center;justify-content:center;height:100%;font-family:sans-serif;color:#999;background:#fafafa;'><p>📝 Fill out the form and click <strong>Generate Preview</strong> to see your portfolio here.</p></body></html>"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============ STATE ============
+        let selectedAccentColor = '#4a90d9';
+        let selectedTheme = 'light';
+        let currentPreviewWidth = 'full';
+
+        // ============ DYNAMIC FORM HELPERS ============
+        function updateEntryNumbers(containerSelector, labelPrefix) {
+            const container = document.getElementById(containerSelector);
+            if (!container) return;
+            const entries = container.querySelectorAll('.dynamic-entry');
+            entries.forEach((entry, i) => {
+                const label = entry.querySelector('.entry-number');
+                if (label) label.textContent = `${labelPrefix} #${i + 1}`;
+            });
+            // Hide remove button if only 1 entry
+            entries.forEach(entry => {
+                const btn = entry.querySelector('.btn-danger-sm');
+                if (btn && entries.length <= 1) {
+                    btn.style.display = 'none';
+                } else if (btn) {
+                    btn.style.display = '';
+                }
+            });
+        }
+
+        function removeEntry(btn) {
+            const entry = btn.closest('.dynamic-entry');
+            const container = entry.parentElement;
+            if (container.querySelectorAll('.dynamic-entry').length <= 1) return; // keep at least 1
+            entry.remove();
+            // Update numbering
+            if (container.id === 'skillsContainer') updateEntryNumbers('skillsContainer', 'Skill');
+            if (container.id === 'projectsContainer') updateEntryNumbers('projectsContainer', 'Project');
+            if (container.id === 'experienceContainer') updateEntryNumbers('experienceContainer', 'Position');
+            if (container.id === 'educationContainer') updateEntryNumbers('educationContainer', 'Education');
+            if (container.id === 'certificationsContainer') updateEntryNumbers('certificationsContainer', 'Cert');
+        }
+
+        function addSkill() {
+            const container = document.getElementById('skillsContainer');
+            const count = container.querySelectorAll('.skill-entry').length + 1;
+            const html = `
+            <div class="dynamic-entry skill-entry">
+              <div class="entry-header"><span class="entry-number">Skill #${count}</span><button class="btn-danger-sm" onclick="removeEntry(this)" title="Remove">✕</button></div>
+              <div class="form-row">
+                <div class="form-group"><label>Skill Name</label><input type="text" class="skill-name" placeholder="Skill name"></div>
+                <div class="form-group" style="max-width:130px;"><label>Proficiency</label><select class="skill-level"><option value="25">Beginner</option><option value="50" selected>Intermediate</option><option value="75">Advanced</option><option value="100">Expert</option></select></div>
+              </div>
+            </div>`;
+            container.insertAdjacentHTML('beforeend', html);
+            updateEntryNumbers('skillsContainer', 'Skill');
+            container.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function addProject() {
+            const container = document.getElementById('projectsContainer');
+            const count = container.querySelectorAll('.project-entry').length + 1;
+            const html = `
+            <div class="dynamic-entry project-entry">
+              <div class="entry-header"><span class="entry-number">Project #${count}</span><button class="btn-danger-sm" onclick="removeEntry(this)" title="Remove">✕</button></div>
+              <div class="form-row">
+                <div class="form-group"><label>Project Title</label><input type="text" class="proj-title" placeholder="Project title"></div>
+                <div class="form-group"><label>Live URL</label><input type="url" class="proj-link" placeholder="https://..."></div>
+              </div>
+              <div class="form-group" style="margin-top:6px;"><label>Technologies (comma-separated)</label><input type="text" class="proj-tech" placeholder="Tech stack"></div>
+              <div class="form-group" style="margin-top:6px;"><label>Description</label><textarea class="proj-desc" placeholder="Description..."></textarea></div>
+            </div>`;
+            container.insertAdjacentHTML('beforeend', html);
+            updateEntryNumbers('projectsContainer', 'Project');
+            container.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function addExperience() {
+            const container = document.getElementById('experienceContainer');
+            const count = container.querySelectorAll('.exp-entry').length + 1;
+            const html = `
+            <div class="dynamic-entry exp-entry">
+              <div class="entry-header"><span class="entry-number">Position #${count}</span><button class="btn-danger-sm" onclick="removeEntry(this)" title="Remove">✕</button></div>
+              <div class="form-row">
+                <div class="form-group"><label>Company</label><input type="text" class="exp-company" placeholder="Company"></div>
+                <div class="form-group"><label>Role</label><input type="text" class="exp-role" placeholder="Role"></div>
+              </div>
+              <div class="form-row" style="margin-top:6px;">
+                <div class="form-group"><label>Start</label><input type="text" class="exp-start" placeholder="2020"></div>
+                <div class="form-group"><label>End</label><input type="text" class="exp-end" placeholder="Present"></div>
+              </div>
+              <div class="form-group" style="margin-top:6px;"><label>Description</label><textarea class="exp-desc" placeholder="Description..."></textarea></div>
+            </div>`;
+            container.insertAdjacentHTML('beforeend', html);
+            updateEntryNumbers('experienceContainer', 'Position');
+            container.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function addEducation() {
+            const container = document.getElementById('educationContainer');
+            const count = container.querySelectorAll('.edu-entry').length + 1;
+            const html = `
+            <div class="dynamic-entry edu-entry">
+              <div class="entry-header"><span class="entry-number">Education #${count}</span><button class="btn-danger-sm" onclick="removeEntry(this)" title="Remove">✕</button></div>
+              <div class="form-row">
+                <div class="form-group"><label>Institution</label><input type="text" class="edu-inst" placeholder="Institution"></div>
+                <div class="form-group"><label>Degree</label><input type="text" class="edu-degree" placeholder="Degree"></div>
+              </div>
+              <div class="form-group" style="margin-top:6px;max-width:140px;"><label>Year</label><input type="text" class="edu-year" placeholder="2020"></div>
+            </div>`;
+            container.insertAdjacentHTML('beforeend', html);
+            updateEntryNumbers('educationContainer', 'Education');
+            container.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function addCertification() {
+            const container = document.getElementById('certificationsContainer');
+            const count = container.querySelectorAll('.cert-entry').length + 1;
+            const html = `
+            <div class="dynamic-entry cert-entry">
+              <div class="entry-header"><span class="entry-number">Cert #${count}</span><button class="btn-danger-sm" onclick="removeEntry(this)" title="Remove">✕</button></div>
+              <div class="form-row">
+                <div class="form-group"><label>Name</label><input type="text" class="cert-name" placeholder="Certification name"></div>
+                <div class="form-group"><label>Issuer</label><input type="text" class="cert-issuer" placeholder="Issuer"></div>
+              </div>
+              <div class="form-group" style="margin-top:6px;max-width:140px;"><label>Year</label><input type="text" class="cert-year" placeholder="2023"></div>
+            </div>`;
+            container.insertAdjacentHTML('beforeend', html);
+            updateEntryNumbers('certificationsContainer', 'Cert');
+            container.lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // ============ CUSTOMIZATION ============
+        function selectColor(swatch) {
+            document.querySelectorAll('#colorSwatches .color-swatch').forEach(s => s.classList.remove('active'));
+            swatch.classList.add('active');
+            selectedAccentColor = swatch.dataset.color;
+        }
+
+        function selectTheme(option) {
+            document.querySelectorAll('.theme-option').forEach(o => o.classList.remove('active'));
+            option.classList.add('active');
+            selectedTheme = option.dataset.theme;
+        }
+
+        function setPreviewWidth(btn, width) {
+            document.querySelectorAll('.device-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentPreviewWidth = width;
+            const wrap = document.getElementById('previewWrap');
+            wrap.classList.remove('phone-view', 'tablet-view');
+            if (width === 'phone') wrap.classList.add('phone-view');
+            if (width === 'tablet') wrap.classList.add('tablet-view');
+        }
+
+        // ============ MOBILE TABS ============
+        function switchMobileTab(tab) {
+            const formPanel = document.getElementById('formPanel');
+            const previewPanel = document.getElementById('previewPanel');
+            const tabs = document.querySelectorAll('#mobileTabs .mobile-tab');
+            tabs.forEach(t => t.classList.remove('active'));
+            if (tab === 'form') {
+                formPanel.classList.remove('hidden-on-mobile');
+                previewPanel.classList.add('hidden-on-mobile');
+                tabs[0].classList.add('active');
+            } else {
+                previewPanel.classList.remove('hidden-on-mobile');
+                formPanel.classList.add('hidden-on-mobile');
+                tabs[1].classList.add('active');
+                generateAndPreview();
+            }
+        }
+
+        // Check mobile on load
+        function checkMobileView() {
+            const mobileTabs = document.getElementById('mobileTabs');
+            if (window.innerWidth <= 900) {
+                mobileTabs.style.display = 'flex';
+            } else {
+                mobileTabs.style.display = 'none';
+                document.getElementById('formPanel').classList.remove('hidden-on-mobile');
+                document.getElementById('previewPanel').classList.remove('hidden-on-mobile');
+            }
+        }
+        window.addEventListener('resize', checkMobileView);
+        checkMobileView();
+
+        // ============ GATHER FORM DATA ============
+        function gatherFormData() {
+            const getVal = (id) => document.getElementById(id)?.value?.trim() || '';
+            const isChecked = (id) => document.getElementById(id)?.checked ?? true;
+
+            // Skills
+            const skills = [];
+            document.querySelectorAll('#skillsContainer .skill-entry').forEach(entry => {
+                const name = entry.querySelector('.skill-name')?.value?.trim();
+                const level = entry.querySelector('.skill-level')?.value || '50';
+                if (name) skills.push({ name, level: parseInt(level) });
+            });
+
+            // Projects
+            const projects = [];
+            document.querySelectorAll('#projectsContainer .project-entry').forEach(entry => {
+                const title = entry.querySelector('.proj-title')?.value?.trim();
+                const link = entry.querySelector('.proj-link')?.value?.trim();
+                const tech = entry.querySelector('.proj-tech')?.value?.trim();
+                const desc = entry.querySelector('.proj-desc')?.value?.trim();
+                if (title || desc)
+                    projects.push({ title: title || 'Untitled Project', link, tech, desc });
+            });
+
+            // Experience
+            const experience = [];
+            document.querySelectorAll('#experienceContainer .exp-entry').forEach(entry => {
+                const company = entry.querySelector('.exp-company')?.value?.trim();
+                const role = entry.querySelector('.exp-role')?.value?.trim();
+                const start = entry.querySelector('.exp-start')?.value?.trim();
+                const end = entry.querySelector('.exp-end')?.value?.trim();
+                const desc = entry.querySelector('.exp-desc')?.value?.trim();
+                if (company || role) experience.push({ company: company || '',
+                    role: role || '', start, end, desc });
+            });
+
+            // Education
+            const education = [];
+            document.querySelectorAll('#educationContainer .edu-entry').forEach(entry => {
+                const inst = entry.querySelector('.edu-inst')?.value?.trim();
+                const degree = entry.querySelector('.edu-degree')?.value?.trim();
+                const year = entry.querySelector('.edu-year')?.value?.trim();
+                if (inst || degree) education.push({ institution: inst || '', degree: degree || '',
+                    year });
+            });
+
+            // Certifications
+            const certifications = [];
+            document.querySelectorAll('#certificationsContainer .cert-entry').forEach(entry => {
+                const name = entry.querySelector('.cert-name')?.value?.trim();
+                const issuer = entry.querySelector('.cert-issuer')?.value?.trim();
+                const year = entry.querySelector('.cert-year')?.value?.trim();
+                if (name || issuer) certifications.push({ name: name || '', issuer: issuer || '',
+                    year });
+            });
+
+            // Hobbies
+            const hobbiesRaw = getVal('hobbies');
+            const hobbies = hobbiesRaw ? hobbiesRaw.split(',').map(h => h.trim()).filter(h => h.length > 0) : [];
+
+            return {
+                name: getVal('name') || 'Your Name',
+                title: getVal('title') || 'Professional Title',
+                tagline: getVal('tagline'),
+                photoUrl: getVal('photoUrl'),
+                about: getVal('about'),
+                skills,
+                projects,
+                experience,
+                education,
+                certifications,
+                hobbies,
+                email: getVal('email'),
+                phone: getVal('phone'),
+                location: getVal('location'),
+                github: getVal('github'),
+                linkedin: getVal('linkedin'),
+                twitter: getVal('twitter'),
+                website: getVal('website'),
+                includeSkills: isChecked('includeSkills'),
+                includeProjects: isChecked('includeProjects'),
+                includeExperience: isChecked('includeExperience'),
+                includeEducation: isChecked('includeEducation'),
+                includeCertifications: isChecked('includeCertifications'),
+                includeHobbies: isChecked('includeHobbies'),
+                includeContact: isChecked('includeContact'),
+                accentColor: selectedAccentColor,
+                theme: selectedTheme,
+            };
+        }
+
+        // ============ GENERATE PORTFOLIO HTML ============
+        function generatePortfolioHTML(data) {
+            const cssAccent = data.accentColor;
+            const cssAccentLight = data.accentColor + '22';
+            const isDark = data.theme === 'dark';
+
+            // Theme-dependent CSS variables
+            const bgColor = isDark ? '#1a1d23' : '#ffffff';
+            const textColor = isDark ? '#e1e4e8' : '#2d3436';
+            const textSecondary = isDark ? '#a0a6b0' : '#636e72';
+            const surfaceColor = isDark ? '#21252b' : '#f8f9fa';
+            const borderColor = isDark ? '#333842' : '#e0e4e8';
+            const cardBg = isDark ? '#282c34' : '#ffffff';
+            const cardShadow = isDark ? '0 2px 12px rgba(0,0,0,0.3)' : '0 2px 16px rgba(0,0,0,0.07)';
+            const heroBg = isDark ?
+                `linear-gradient(135deg, #1a1d23 0%, #1e2230 40%, ${cssAccent}22 100%)` :
+                `linear-gradient(135deg, #f8fafc 0%, #eef2ff 40%, ${cssAccentLight} 100%)`;
+            const skillBg = isDark ? '#333842' : '#e9ecef';
+            const tagBg = isDark ? '#2a3040' : '#eef2ff';
+            const tagText = isDark ? '#c0c8d4' : '#4a5568';
+            const toggleBg = isDark ? '#555' : '#ccc';
+
+            const html = `<!DOCTYPE html>
+    <html lang="en" data-theme="${data.theme}">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>${escapeHTML(data.name)} — Portfolio</title>
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+      <style>
+        :root {
+          --accent: ${cssAccent};
+          --accent-light: ${cssAccentLight};
+          --bg: ${bgColor};
+          --text: ${textColor};
+          --text-secondary: ${textSecondary};
+          --surface: ${surfaceColor};
+          --border: ${borderColor};
+          --card-bg: ${cardBg};
+          --card-shadow: ${cardShadow};
+          --hero-bg: ${heroBg};
+          --skill-bg: ${skillBg};
+          --tag-bg: ${tagBg};
+          --tag-text: ${tagText};
+          --toggle-bg: ${toggleBg};
+          --radius: 12px;
+          --radius-sm: 8px;
+          --transition: 0.25s ease;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+          font-family: 'Inter', system-ui, -apple-system, sans-serif;
+          background: var(--bg);
+          color: var(--text);
+          line-height: 1.6;
+          -webkit-font-smoothing: antialiased;
+          transition: background var(--transition), color var(--transition);
+        }
+
+        /* Theme Toggle */
+        .theme-toggle-wrap {
+          position: fixed;
+          top: 16px;
+          right: 16px;
+          z-index: 100;
+        }
+        .theme-toggle {
+          background: var(--surface);
+          border: 1.5px solid var(--border);
+          border-radius: 24px;
+          padding: 8px 14px;
+          cursor: pointer;
+          font-size: 0.85rem;
+          font-weight: 600;
+          color: var(--text);
+          transition: var(--transition);
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          box-shadow: var(--card-shadow);
+        }
+        .theme-toggle:hover {
+          border-color: var(--accent);
+        }
+
+        /* Navigation */
+        .nav {
+          display: flex;
+          justify-content: center;
+          flex-wrap: wrap;
+          gap: 8px;
+          padding: 16px 20px;
+          background: var(--surface);
+          border-bottom: 1px solid var(--border);
+          position: sticky;
+          top: 0;
+          z-index: 50;
+          backdrop-filter: blur(8px);
+        }
+        .nav a {
+          color: var(--text-secondary);
+          text-decoration: none;
+          font-size: 0.85rem;
+          font-weight: 500;
+          padding: 6px 14px;
+          border-radius: 20px;
+          transition: var(--transition);
+        }
+        .nav a:hover {
+          color: var(--accent);
+          background: var(--accent-light);
+        }
+
+        /* Hero */
+        .hero {
+          background: var(--hero-bg);
+          text-align: center;
+          padding: 60px 24px 50px;
+          transition: background var(--transition);
+        }
+        .hero-avatar {
+          width: 110px;
+          height: 110px;
+          border-radius: 50%;
+          object-fit: cover;
+          border: 4px solid var(--accent);
+          margin-bottom: 16px;
+          box-shadow: 0 6px 24px rgba(0,0,0,0.15);
+        }
+        .hero-avatar-placeholder {
+          width: 110px;
+          height: 110px;
+          border-radius: 50%;
+          background: var(--accent);
+          color: #fff;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 2.6rem;
+          font-weight: 700;
+          margin-bottom: 16px;
+          box-shadow: 0 6px 24px rgba(0,0,0,0.15);
+        }
+        .hero h1 {
+          font-size: 2.5rem;
+          font-weight: 800;
+          letter-spacing: -0.8px;
+          margin-bottom: 6px;
+        }
+        .hero .title {
+          font-size: 1.15rem;
+          color: var(--accent);
+          font-weight: 600;
+          margin-bottom: 4px;
+        }
+        .hero .tagline {
+          font-size: 1rem;
+          color: var(--text-secondary);
+          max-width: 500px;
+          margin: 8px auto 0;
+        }
+
+        /* Sections */
+        .section {
+          max-width: 860px;
+          margin: 0 auto;
+          padding: 48px 24px;
+        }
+        .section-title {
+          font-size: 1.6rem;
+          font-weight: 700;
+          letter-spacing: -0.5px;
+          margin-bottom: 24px;
+          position: relative;
+          display: inline-block;
+        }
+        .section-title::after {
+          content: '';
+          display: block;
+          width: 50px;
+          height: 3.5px;
+          background: var(--accent);
+          margin-top: 6px;
+          border-radius: 2px;
+        }
+        .section-subtitle {
+          color: var(--text-secondary);
+          font-size: 0.95rem;
+          margin-bottom: 20px;
+          max-width: 600px;
+        }
+
+        /* Skills */
+        .skills-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+          gap: 14px;
+        }
+        .skill-item {
+          background: var(--card-bg);
+          border: 1px solid var(--border);
+          border-radius: var(--radius-sm);
+          padding: 14px 16px;
+          box-shadow: var(--card-shadow);
+          transition: var(--transition);
+        }
+        .skill-item:hover {
+          border-color: var(--accent);
+          transform: translateY(-2px);
+        }
+        .skill-name {
+          font-weight: 600;
+          font-size: 0.9rem;
+          margin-bottom: 6px;
+          display: flex;
+          justify-content: space-between;
+        }
+        .skill-bar-wrap {
+          background: var(--skill-bg);
+          border-radius: 10px;
+          height: 7px;
+          overflow: hidden;
+        }
+        .skill-bar-fill {
+          height: 100%;
+          background: var(--accent);
+          border-radius: 10px;
+          transition: width 0.6s ease;
+        }
+        .skill-level-label {
+          font-size: 0.7rem;
+          color: var(--text-secondary);
+          text-transform: uppercase;
+          letter-spacing: 0.3px;
+        }
+
+        /* Projects */
+        .projects-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          gap: 18px;
+        }
+        .project-card {
+          background: var(--card-bg);
+          border: 1px solid var(--border);
+          border-radius: var(--radius);
+          padding: 20px;
+          box-shadow: var(--card-shadow);
+          transition: var(--transition);
+          display: flex;
+          flex-direction: column;
+        }
+        .project-card:hover {
+          border-color: var(--accent);
+          transform: translateY(-3px);
+          box-shadow: 0 8px 28px rgba(0,0,0,0.12);
+        }
+        .project-card h4 {
+          font-size: 1.05rem;
+          font-weight: 700;
+          margin-bottom: 6px;
+        }
+        .project-card .proj-desc {
+          font-size: 0.85rem;
+          color: var(--text-secondary);
+          flex: 1;
+          margin-bottom: 10px;
+        }
+        .project-card .proj-tech-tags {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 5px;
+          margin-bottom: 10px;
+        }
+        .proj-tech-tag {
+          background: var(--tag-bg);
+          color: var(--tag-text);
+          font-size: 0.7rem;
+          font-weight: 600;
+          padding: 3px 9px;
+          border-radius: 12px;
+        }
+        .project-card .proj-link {
+          font-size: 0.8rem;
+          font-weight: 600;
+          color: var(--accent);
+          text-decoration: none;
+          transition: var(--transition);
+        }
+        .project-card .proj-link:hover {
+          text-decoration: underline;
+        }
+
+        /* Experience / Education */
+        .timeline {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+        .timeline-item {
+          background: var(--card-bg);
+          border: 1px solid var(--border);
+          border-left: 4px solid var(--accent);
+          border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+          padding: 16px 20px;
+          box-shadow: var(--card-shadow);
+          transition: var(--transition);
+        }
+        .timeline-item:hover {
+          border-left-color: var(--accent);
+          box-shadow: 0 4px 18px rgba(0,0,0,0.1);
+        }
+        .timeline-header {
+          display: flex;
+          justify-content: space-between;
+          flex-wrap: wrap;
+          gap: 6px;
+          margin-bottom: 4px;
+        }
+        .timeline-header h4 {
+          font-weight: 700;
+          font-size: 1rem;
+        }
+        .timeline-header .date {
+          font-size: 0.8rem;
+          color: var(--text-secondary);
+          font-weight: 500;
+        }
+        .timeline-sub {
+          font-size: 0.85rem;
+          color: var(--accent);
+          font-weight: 600;
+          margin-bottom: 6px;
+        }
+        .timeline-desc {
+          font-size: 0.85rem;
+          color: var(--text-secondary);
+        }
+
+        /* Certifications */
+        .certs-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+          gap: 12px;
+        }
+        .cert-card {
+          background: var(--card-bg);
+          border: 1px solid var(--border);
+          border-radius: var(--radius-sm);
+          padding: 14px 16px;
+          box-shadow: var(--card-shadow);
+          text-align: center;
+          transition: var(--transition);
+        }
+        .cert-card:hover {
+          border-color: var(--accent);
+        }
+        .cert-card h4 {
+          font-weight: 700;
+          font-size: 0.9rem;
+        }
+        .cert-card .cert-issuer {
+          font-size: 0.8rem;
+          color: var(--accent);
+          font-weight: 500;
+        }
+        .cert-card .cert-year {
+          font-size: 0.75rem;
+          color: var(--text-secondary);
+        }
+
+        /* Hobbies */
+        .hobby-tags {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+          justify-content: center;
+        }
+        .hobby-tag {
+          background: var(--tag-bg);
+          color: var(--tag-text);
+          font-weight: 600;
+          font-size: 0.85rem;
+          padding: 8px 18px;
+          border-radius: 24px;
+          transition: var(--transition);
+          border: 1.5px solid transparent;
+        }
+        .hobby-tag:hover {
+          border-color: var(--accent);
+          color: var(--accent);
+        }
+
+        /* Contact */
+        .contact-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+          gap: 12px;
+          margin-bottom: 20px;
+        }
+        .contact-item {
+          background: var(--card-bg);
+          border: 1px solid var(--border);
+          border-radius: var(--radius-sm);
+          padding: 12px 16px;
+          font-size: 0.85rem;
+          box-shadow: var(--card-shadow);
+          transition: var(--transition);
+        }
+        .contact-item strong {
+          display: block;
+          font-size: 0.7rem;
+          text-transform: uppercase;
+          letter-spacing: 0.4px;
+          color: var(--text-secondary);
+          margin-bottom: 2px;
+        }
+        .contact-item a {
+          color: var(--accent);
+          text-decoration: none;
+        }
+        .social-links {
+          display: flex;
+          gap: 12px;
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+        .social-link {
+          background: var(--accent);
+          color: #fff;
+          padding: 10px 20px;
+          border-radius: 24px;
+          text-decoration: none;
+          font-weight: 600;
+          font-size: 0.85rem;
+          transition: var(--transition);
+        }
+        .social-link:hover {
+          opacity: 0.85;
+          transform: translateY(-2px);
+        }
+
+        /* Footer */
+        .footer {
+          text-align: center;
+          padding: 28px 20px;
+          color: var(--text-secondary);
+          font-size: 0.8rem;
+          border-top: 1px solid var(--border);
+          margin-top: 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+          .hero h1 { font-size: 1.8rem; }
+          .hero { padding: 40px 16px 34px; }
+          .section { padding: 32px 16px; }
+          .section-title { font-size: 1.3rem; }
+          .projects-grid { grid-template-columns: 1fr; }
+          .skills-grid { grid-template-columns: 1fr 1fr; }
+          .certs-grid { grid-template-columns: 1fr 1fr; }
+          .contact-grid { grid-template-columns: 1fr; }
+          .nav { gap: 4px; padding: 10px 8px; }
+          .nav a { font-size: 0.75rem; padding: 5px 10px; }
+        }
+        @media (max-width: 480px) {
+          .hero h1 { font-size: 1.5rem; }
+          .hero-avatar, .hero-avatar-placeholder { width: 80px; height: 80px; font-size: 2rem; }
+          .skills-grid { grid-template-columns: 1fr; }
+          .certs-grid { grid-template-columns: 1fr; }
+          .timeline-header { flex-direction: column; }
+          .theme-toggle-wrap { top: 8px; right: 8px; }
+          .theme-toggle { font-size: 0.75rem; padding: 6px 10px; }
+        }
+      </style>
+    </head>
+    <body>
+      <!-- Theme Toggle -->
+      <div class="theme-toggle-wrap">
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+          <span class="theme-icon">${isDark ? '☀️' : '🌙'}</span> ${isDark ? 'Light Mode' : 'Dark Mode'}
+        </button>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="nav">
+        <a href="#about">About</a>
+        ${data.includeSkills && data.skills.length > 0 ? '<a href="#skills">Skills</a>' : ''}
+        ${data.includeProjects && data.projects.length > 0 ? '<a href="#projects">Projects</a>' : ''}
+        ${data.includeExperience && data.experience.length > 0 ? '<a href="#experience">Experience</a>' : ''}
+        ${data.includeEducation && data.education.length > 0 ? '<a href="#education">Education</a>' : ''}
+        ${data.includeCertifications && data.certifications.length > 0 ? '<a href="#certifications">Certifications</a>' : ''}
+        ${data.includeHobbies && data.hobbies.length > 0 ? '<a href="#hobbies">Hobbies</a>' : ''}
+        ${data.includeContact ? '<a href="#contact">Contact</a>' : ''}
+      </nav>
+
+      <!-- Hero -->
+      <header class="hero">
+        ${data.photoUrl
+          ? `<img class="hero-avatar" src="${escapeHTML(data.photoUrl)}" alt="${escapeHTML(data.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex';">`
+          : ''
+        }
+        <div class="hero-avatar-placeholder" style="${data.photoUrl ? 'display:none;' : ''}">${getInitials(data.name)}</div>
+        <h1>${escapeHTML(data.name)}</h1>
+        <p class="title">${escapeHTML(data.title)}</p>
+        ${data.tagline ? `<p class="tagline">${escapeHTML(data.tagline)}</p>` : ''}
+      </header>
+
+      <main>
+        <!-- About -->
+        ${data.about ? `
+        <section class="section" id="about">
+          <h2 class="section-title">About Me</h2>
+          <p class="section-subtitle">${escapeHTML(data.about)}</p>
+        </section>` : ''}
+
+        <!-- Skills -->
+        ${data.includeSkills && data.skills.length > 0 ? `
+        <section class="section" id="skills">
+          <h2 class="section-title">Skills</h2>
+          <div class="skills-grid">
+            ${data.skills.map(s => `
+            <div class="skill-item">
+              <div class="skill-name"><span>${escapeHTML(s.name)}</span><span class="skill-level-label">${getLevelLabel(s.level)}</span></div>
+              <div class="skill-bar-wrap"><div class="skill-bar-fill" style="width:${s.level}%;"></div></div>
+            </div>`).join('\n            ')}
+          </div>
+        </section>` : ''}
+
+        <!-- Projects -->
+        ${data.includeProjects && data.projects.length > 0 ? `
+        <section class="section" id="projects">
+          <h2 class="section-title">Projects</h2>
+          <div class="projects-grid">
+            ${data.projects.map(p => `
+            <article class="project-card">
+              <h4>${escapeHTML(p.title)}</h4>
+              ${p.desc ? `<p class="proj-desc">${escapeHTML(p.desc)}</p>` : ''}
+              ${p.tech ? `<div class="proj-tech-tags">${p.tech.split(',').map(t => `<span class="proj-tech-tag">${escapeHTML(t.trim())}</span>`).join('')}</div>` : ''}
+              ${p.link ? `<a href="${escapeHTML(p.link)}" class="proj-link" target="_blank" rel="noopener">🔗 View Project →</a>` : ''}
+            </article>`).join('\n            ')}
+          </div>
+        </section>` : ''}
+
+        <!-- Experience -->
+        ${data.includeExperience && data.experience.length > 0 ? `
+        <section class="section" id="experience">
+          <h2 class="section-title">Experience</h2>
+          <div class="timeline">
+            ${data.experience.map(exp => `
+            <div class="timeline-item">
+              <div class="timeline-header">
+                <h4>${escapeHTML(exp.role || exp.company)}</h4>
+                <span class="date">${escapeHTML(exp.start)} — ${escapeHTML(exp.end)}</span>
+              </div>
+              ${exp.company && exp.role ? `<p class="timeline-sub">${escapeHTML(exp.company)}</p>` : ''}
+              ${exp.desc ? `<p class="timeline-desc">${escapeHTML(exp.desc)}</p>` : ''}
+            </div>`).join('\n            ')}
+          </div>
+        </section>` : ''}
+
+        <!-- Education -->
+        ${data.includeEducation && data.education.length > 0 ? `
+        <section class="section" id="education">
+          <h2 class="section-title">Education</h2>
+          <div class="timeline">
+            ${data.education.map(edu => `
+            <div class="timeline-item">
+              <div class="timeline-header">
+                <h4>${escapeHTML(edu.degree || edu.institution)}</h4>
+                <span class="date">${escapeHTML(edu.year)}</span>
+              </div>
+              ${edu.institution && edu.degree ? `<p class="timeline-sub">${escapeHTML(edu.institution)}</p>` : ''}
+            </div>`).join('\n            ')}
+          </div>
+        </section>` : ''}
+
+        <!-- Certifications -->
+        ${data.includeCertifications && data.certifications.length > 0 ? `
+        <section class="section" id="certifications">
+          <h2 class="section-title">Certifications</h2>
+          <div class="certs-grid">
+            ${data.certifications.map(cert => `
+            <div class="cert-card">
+              <h4>${escapeHTML(cert.name)}</h4>
+              ${cert.issuer ? `<p class="cert-issuer">${escapeHTML(cert.issuer)}</p>` : ''}
+              ${cert.year ? `<p class="cert-year">${escapeHTML(cert.year)}</p>` : ''}
+            </div>`).join('\n            ')}
+          </div>
+        </section>` : ''}
+
+        <!-- Hobbies -->
+        ${data.includeHobbies && data.hobbies.length > 0 ? `
+        <section class="section" id="hobbies">
+          <h2 class="section-title">Hobbies &amp; Interests</h2>
+          <div class="hobby-tags">
+            ${data.hobbies.map(h => `<span class="hobby-tag">${escapeHTML(h)}</span>`).join('\n            ')}
+          </div>
+        </section>` : ''}
+
+        <!-- Contact -->
+        ${data.includeContact ? `
+        <section class="section" id="contact">
+          <h2 class="section-title">Contact</h2>
+          <div class="contact-grid">
+            ${data.email ? `<div class="contact-item"><strong>Email</strong><a href="mailto:${escapeHTML(data.email)}">${escapeHTML(data.email)}</a></div>` : ''}
+            ${data.phone ? `<div class="contact-item"><strong>Phone</strong>${escapeHTML(data.phone)}</div>` : ''}
+            ${data.location ? `<div class="contact-item"><strong>Location</strong>${escapeHTML(data.location)}</div>` : ''}
+          </div>
+          <div class="social-links">
+            ${data.github ? `<a href="${escapeHTML(data.github)}" class="social-link" target="_blank" rel="noopener">GitHub</a>` : ''}
+            ${data.linkedin ? `<a href="${escapeHTML(data.linkedin)}" class="social-link" target="_blank" rel="noopener">LinkedIn</a>` : ''}
+            ${data.twitter ? `<a href="${escapeHTML(data.twitter)}" class="social-link" target="_blank" rel="noopener">Twitter</a>` : ''}
+            ${data.website ? `<a href="${escapeHTML(data.website)}" class="social-link" target="_blank" rel="noopener">Website</a>` : ''}
+          </div>
+        </section>` : ''}
+      </main>
+
+      <footer class="footer">
+        <p>&copy; ${new Date().getFullYear()} ${escapeHTML(data.name)}. Built with the Instant Portfolio Generator.</p>
+      </footer>
+
+      <script>
+        function toggleTheme() {
+          const html = document.documentElement;
+          const current = html.getAttribute('data-theme');
+          const next = current === 'dark' ? 'light' : 'dark';
+          html.setAttribute('data-theme', next);
+          const btn = document.querySelector('.theme-toggle');
+          const icon = btn.querySelector('.theme-icon');
+          if (next === 'dark') {
+            btn.innerHTML = '<span class="theme-icon">☀️</span> Light Mode';
+          } else {
+            btn.innerHTML = '<span class="theme-icon">🌙</span> Dark Mode';
+          }
+          // Update CSS variables dynamically
+          const isDark = next === 'dark';
+          document.documentElement.style.setProperty('--bg', isDark ? '#1a1d23' : '#ffffff');
+          document.documentElement.style.setProperty('--text', isDark ? '#e1e4e8' : '#2d3436');
+          document.documentElement.style.setProperty('--text-secondary', isDark ? '#a0a6b0' : '#636e72');
+          document.documentElement.style.setProperty('--surface', isDark ? '#21252b' : '#f8f9fa');
+          document.documentElement.style.setProperty('--border', isDark ? '#333842' : '#e0e4e8');
+          document.documentElement.style.setProperty('--card-bg', isDark ? '#282c34' : '#ffffff');
+          document.documentElement.style.setProperty('--card-shadow', isDark ? '0 2px 12px rgba(0,0,0,0.3)' : '0 2px 16px rgba(0,0,0,0.07)');
+          document.documentElement.style.setProperty('--skill-bg', isDark ? '#333842' : '#e9ecef');
+          document.documentElement.style.setProperty('--tag-bg', isDark ? '#2a3040' : '#eef2ff');
+          document.documentElement.style.setProperty('--tag-text', isDark ? '#c0c8d4' : '#4a5568');
+          document.documentElement.style.setProperty('--hero-bg', isDark
+            ? 'linear-gradient(135deg, #1a1d23 0%, #1e2230 40%, ${cssAccent}22 100%)'
+            : 'linear-gradient(135deg, #f8fafc 0%, #eef2ff 40%, ${cssAccentLight} 100%)');
+        }
+      <\/script>
+    </body>
+    </html>`;
+
+            return html;
+        }
+
+        // ============ HELPER FUNCTIONS ============
+        function escapeHTML(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function getInitials(name) {
+            if (!name || name === 'Your Name') return '?';
+            const parts = name.trim().split(/\s+/);
+            if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+            return parts[0][0].toUpperCase();
+        }
+
+        function getLevelLabel(level) {
+            if (level >= 100) return 'Expert';
+            if (level >= 75) return 'Advanced';
+            if (level >= 50) return 'Intermediate';
+            return 'Beginner';
+        }
+
+        // ============ PREVIEW & DOWNLOAD ============
+        function generateAndPreview() {
+            const data = gatherFormData();
+            const portfolioHTML = generatePortfolioHTML(data);
+            const iframe = document.getElementById('previewIframe');
+            iframe.srcdoc = portfolioHTML;
+            // Store for download
+            iframe._portfolioHTML = portfolioHTML;
+            // On mobile, switch to preview
+            if (window.innerWidth <= 900) {
+                switchMobileTab('preview');
+            }
+            // Scroll preview into view
+            document.getElementById('previewPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function downloadPortfolio() {
+            const iframe = document.getElementById('previewIframe');
+            let html = iframe._portfolioHTML;
+            if (!html) {
+                // Generate if not yet generated
+                const data = gatherFormData();
+                html = generatePortfolioHTML(data);
+                iframe.srcdoc = html;
+                iframe._portfolioHTML = html;
+            }
+            const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const name = gatherFormData().name.replace(/\s+/g, '_').toLowerCase() || 'portfolio';
+            a.download = `${name}_portfolio.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('✅ Portfolio downloaded successfully!');
+        }
+
+        function showToast(message) {
+            const existing = document.querySelector('.toast');
+            if (existing) existing.remove();
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2500);
+        }
+
+        // ============ SAMPLE DATA ============
+        function loadSampleData() {
+            document.getElementById('name').value = 'Alexandra Chen';
+            document.getElementById('title').value = 'Full-Stack Developer & UI/UX Enthusiast';
+            document.getElementById('tagline').value = 'Crafting delightful digital experiences with clean code and creative design.';
+            document.getElementById('photoUrl').value = '';
+            document.getElementById('about').value =
+                'I am a passionate full-stack developer with over 6 years of experience building modern web applications. I love turning complex problems into simple, elegant solutions. When I\'m not coding, you\'ll find me exploring new technologies, contributing to open-source projects, or mentoring aspiring developers.';
+
+            // Skills
+            const skillsContainer = document.getElementById('skillsContainer');
+            skillsContainer.innerHTML = '';
+            [
+                { name: 'JavaScript / TypeScript', level: '100' },
+                { name: 'React & Next.js', level: '100' },
+                { name: 'Node.js & Express', level: '75' },
+                { name: 'Python', level: '50' },
+                { name: 'PostgreSQL & MongoDB', level: '75' },
+                { name: 'Docker & AWS', level: '50' },
+                { name: 'CSS / Tailwind', level: '100' },
+                { name: 'Figma', level: '75' },
+            ].forEach((s, i) => {
+                const html = `
+              <div class="dynamic-entry skill-entry">
+                <div class="entry-header"><span class="entry-number">Skill #${i+1}</span><button class="btn-danger-sm" onclick="removeEntry(this)" title="Remove">✕</button></div>
+                <div class="form-row">
+                  <div class="form-group"><label>Skill Name</label><input type="text" class="skill-name" value="${escapeHTML(s.name)}"></div>
+                  <div class="form-group" style="max-width:130px;"><label>Proficiency</label><select class="skill-level"><option value="25">Beginner</option><option value="50">Intermediate</option><option value="75" ${s.level==='75'?'selected':''}>Advanced</option><option value="100" ${s.level==='100'?'selected':''}>Expert</option></select></div>
+                </div>
+              </div>`;
+                skillsContainer.insertAdjacentHTML('beforeend', html);
+            });
+            updateEntryNumbers('skillsContainer', 'Skill');
+
+            // Projects
+            const projectsContainer = document.getElementById('projectsContainer');
+            projectsContainer.innerHTML = '';
+            [
+                { title: 'ShopFlow E-Commerce Platform',
+                    link: 'https://example.com/shopflow', tech: 'Next.js, Stripe, PostgreSQL, Tailwind',
+                    desc: 'A full-featured e-commerce platform with real-time inventory, payment processing, and an admin dashboard.' },
+                { title: 'DevCollab',
+                    link: 'https://example.com/devcollab', tech: 'React, Socket.io, Node.js, MongoDB',
+                    desc: 'Real-time collaborative coding environment with video chat, shared editor, and project management tools.' },
+                { title: 'WeatherVista',
+                    link: '', tech: 'Vue.js, OpenWeather API, Chart.js',
+                    desc: 'Beautiful weather dashboard with 7-day forecasts, interactive maps, and severe weather alerts.' },
+            ].forEach((p, i) => {
+                const html = `
+              <div class="dynamic-entry project-entry">
+                <div class="entry-header"><span class="entry-number">Project #${i+1}</span><button class="btn-danger-sm" onclick="removeEntry(this)" title="Remove">✕</button></div>
+                <div class="form-row">
+                  <div class="form-group"><label>Project Title</label><input type="text" class="proj-title" value="${escapeHTML(p.title)}"></div>
+                  <div class="form-group"><label>Live URL</label><input type="url" class="proj-link" value="${escapeHTML(p.link)}"></div>
+                </div>
+                <div class="form-group" style="margin-top:6px;"><label>Technologies</label><input type="text" class="proj-tech" value="${escapeHTML(p.tech)}"></div>
+                <div class="form-group" style="margin-top:6px;"><label>Description</label><textarea class="proj-desc">${escapeHTML(p.desc)}</textarea></div>
+              </div>`;
+                projectsContainer.insertAdjacentHTML('beforeend', html);
+            });
+            updateEntryNumbers('projectsContainer', 'Project');
+
+            // Experience
+            const expContainer = document.getElementById('experienceContainer');
+            expContainer.innerHTML = '';
+            [
+                { company: 'TechNova Inc.', role: 'Senior Full-Stack Developer', start: '2022',
+                    end: 'Present', desc: 'Leading a team of 6 developers building cloud-native SaaS products. Architected microservices serving 2M+ users.' },
+                { company: 'StartupHub', role: 'Full-Stack Developer', start: '2019', end: '2022',
+                    desc: 'Developed and maintained multiple client-facing web applications. Improved CI/CD pipeline reducing deployment time by 60%.' },
+            ].forEach((exp, i) => {
+                const html = `
+              <div class="dynamic-entry exp-entry">
+                <div class="entry-header"><span class="entry-number">Position #${i+1}</span><button class="btn-danger-sm" onclick="removeEntry(this)" title="Remove">✕</button></div>
+                <div class="form-row">
+                  <div class="form-group"><label>Company</label><input type="text" class="exp-company" value="${escapeHTML(exp.company)}"></div>
+                  <div class="form-group"><label>Role</label><input type="text" class="exp-role" value="${escapeHTML(exp.role)}"></div>
+                </div>
+                <div class="form-row" style="margin-top:6px;">
+                  <div class="form-group"><label>Start</label><input type="text" class="exp-start" value="${escapeHTML(exp.start)}"></div>
+                  <div class="form-group"><label>End</label><input type="text" class="exp-end" value="${escapeHTML(exp.end)}"></div>
+                </div>
+                <div class="form-group" style="margin-top:6px;"><label>Description</label><textarea class="exp-desc">${escapeHTML(exp.desc)}</textarea></div>
+              </div>`;
+                expContainer.insertAdjacentHTML('beforeend', html);
+            });
+            updateEntryNumbers('experienceContainer', 'Position');
+
+            // Education
+            const eduContainer = document.getElementById('educationContainer');
+            eduContainer.innerHTML = '';
+            [
+                { institution: 'UC Berkeley', degree: 'B.Sc. Computer Science', year: '2018' },
+            ].forEach((edu, i) => {
+                const html = `
+              <div class="dynamic-entry edu-entry">
+                <div class="entry-header"><span class="entry-number">Education #${i+1}</span><button class="btn-danger-sm" onclick="removeEntry(this)" title="Remove">✕</button></div>
+                <div class="form-row">
+                  <div class="form-group"><label>Institution</label><input type="text" class="edu-inst" value="${escapeHTML(edu.institution)}"></div>
+                  <div class="form-group"><label>Degree</label><input type="text" class="edu-degree" value="${escapeHTML(edu.degree)}"></div>
+                </div>
+                <div class="form-group" style="margin-top:6px;max-width:140px;"><label>Year</label><input type="text" class="edu-year" value="${escapeHTML(edu.year)}"></div>
+              </div>`;
+                eduContainer.insertAdjacentHTML('beforeend', html);
+            });
+            updateEntryNumbers('educationContainer', 'Education');
+
+            // Certifications
+            const certContainer = document.getElementById('certificationsContainer');
+            certContainer.innerHTML = '';
+            [
+                { name: 'AWS Solutions Architect', issuer: 'Amazon Web Services', year: '2023' },
+                { name: 'Google UX Design Certificate', issuer: 'Google', year: '2022' },
+            ].forEach((cert, i) => {
+                const html = `
+              <div class="dynamic-entry cert-entry">
+                <div class="entry-header"><span class="entry-number">Cert #${i+1}</span><button class="btn-danger-sm" onclick="removeEntry(this)" title="Remove">✕</button></div>
+                <div class="form-row">
+                  <div class="form-group"><label>Name</label><input type="text" class="cert-name" value="${escapeHTML(cert.name)}"></div>
+                  <div class="form-group"><label>Issuer</label><input type="text" class="cert-issuer" value="${escapeHTML(cert.issuer)}"></div>
+                </div>
+                <div class="form-group" style="margin-top:6px;max-width:140px;"><label>Year</label><input type="text" class="cert-year" value="${escapeHTML(cert.year)}"></div>
+              </div>`;
+                certContainer.insertAdjacentHTML('beforeend', html);
+            });
+            updateEntryNumbers('certificationsContainer', 'Cert');
+
+            // Hobbies
+            document.getElementById('hobbies').value =
+                'Photography, Hiking, Open Source, Chess, Playing Guitar, Machine Learning';
+
+            // Contact
+            document.getElementById('email').value = 'alex@example.com';
+            document.getElementById('phone').value = '+1 (415) 555-0198';
+            document.getElementById('location').value = 'San Francisco, CA';
+            document.getElementById('github').value = 'https://github.com/alexchen';
+            document.getElementById('linkedin').value = 'https://linkedin.com/in/alexchen';
+            document.getElementById('twitter').value = 'https://twitter.com/alexchen';
+            document.getElementById('website').value = 'https://alexchen.dev';
+
+            // Ensure all section toggles are on
+            document.getElementById('includeSkills').checked = true;
+            document.getElementById('includeProjects').checked = true;
+            document.getElementById('includeExperience').checked = true;
+            document.getElementById('includeEducation').checked = true;
+            document.getElementById('includeCertifications').checked = true;
+            document.getElementById('includeHobbies').checked = true;
+            document.getElementById('includeContact').checked = true;
+
+            generateAndPreview();
+            showToast('📋 Sample data loaded! Preview updated.');
+        }
+
+        function clearAllFields() {
+            document.querySelectorAll('input[type="text"], input[type="url"], input[type="email"], textarea').forEach(
+            el => el.value = '');
+            document.querySelectorAll('select.skill-level').forEach(el => el.value = '50');
+            document.getElementById('name').value = '';
+            document.getElementById('title').value = '';
+            document.querySelectorAll('.dynamic-entry').forEach(entry => {
+                entry.querySelectorAll('input, textarea').forEach(el => el.value = '');
+            });
+            // Reset to defaults
+            document.getElementById('includeSkills').checked = true;
+            document.getElementById('includeProjects').checked = true;
+            document.getElementById('includeExperience').checked = true;
+            document.getElementById('includeEducation').checked = true;
+            document.getElementById('includeCertifications').checked = true;
+            document.getElementById('includeHobbies').checked = true;
+            document.getElementById('includeContact').checked = true;
+            // Reset color
+            document.querySelectorAll('#colorSwatches .color-swatch').forEach(s => s.classList.remove('active'));
+            const blueSwatch = document.querySelector('#colorSwatches .c-blue');
+            if (blueSwatch) blueSwatch.classList.add('active');
+            selectedAccentColor = '#4a90d9';
+            // Reset theme
+            document.querySelectorAll('.theme-option').forEach(o => o.classList.remove('active'));
+            const lightOpt = document.querySelector('.theme-option[data-theme="light"]');
+            if (lightOpt) lightOpt.classList.add('active');
+            selectedTheme = 'light';
+            // Reset preview
+            const iframe = document.getElementById('previewIframe');
+            iframe.srcdoc =
+                "<html><body style='display:flex;align-items:center;justify-content:center;height:100%;font-family:sans-serif;color:#999;background:#fafafa;'><p>📝 Fill out the form and click <strong>Generate Preview</strong> to see your portfolio here.</p></body></html>";
+            iframe._portfolioHTML = null;
+            showToast('🗑 All fields cleared.');
+        }
+
+        // ============ INITIAL SETUP ============
+        function init() {
+            updateEntryNumbers('skillsContainer', 'Skill');
+            updateEntryNumbers('projectsContainer', 'Project');
+            updateEntryNumbers('experienceContainer', 'Position');
+            updateEntryNumbers('educationContainer', 'Education');
+            updateEntryNumbers('certificationsContainer', 'Cert');
+            // Auto-generate on any input change (debounced)
+            let debounceTimer;
+            const formPanel = document.getElementById('formPanel');
+            formPanel.addEventListener('input', () => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    // Only auto-update if preview is visible
+                    if (!document.getElementById('previewPanel').classList.contains(
+                            'hidden-on-mobile') || window.innerWidth > 900) {
+                        generateAndPreviewSilent();
+                    }
+                }, 600);
+            });
+        }
+
+        function generateAndPreviewSilent() {
+            const data = gatherFormData();
+            const portfolioHTML = generatePortfolioHTML(data);
+            const iframe = document.getElementById('previewIframe');
+            iframe.srcdoc = portfolioHTML;
+            iframe._portfolioHTML = portfolioHTML;
+        }
+
+        init();
+        // Generate initial preview with default empty-ish data
+        setTimeout(generateAndPreviewSilent, 300);
+    </script>
+</body>
+</html>
